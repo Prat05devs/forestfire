@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Van Rakshak shield">
+  <path fill="#082d20" d="M32 4 55 12v17c0 14-8 25-23 31C17 54 9 43 9 29V12z"/>
+  <path fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="m16 35 9-12 7 8 8-13 9 17"/>
+</svg>
