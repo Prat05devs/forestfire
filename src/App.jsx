@@ -6,6 +6,7 @@ const screenshotSources = {
   map: '/map-screen.png',
   advisories: '/official_advisories-weather.png',
   destination: '/recent_updates-uttarakhand.png',
+  settings: '/personalise-notification.png',
   activity: '/all-fire-alers.png',
   detail: '/alert-detail.png',
   zoom: '/zoomed-map.png',

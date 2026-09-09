@@ -17,7 +17,7 @@ Vite previews the website at its printed local URL. The Vercel API function runs
 
 ## Screenshots
 
-See `public/screens/README.md` for the supplied filename mapping. The Home, India map, official advisories, Uttarakhand updates, activity log, observation detail, and zoomed map screenshots are integrated. Map screenshots use `object-fit: contain` to retain attribution. The alert-settings slot remains a labelled placeholder until that screen is supplied. The old Van Rakshak assets are not used; archived v1 source files remain untouched.
+See `public/screens/README.md` for the supplied filename mapping. The Home, India map, official advisories, Uttarakhand updates, notification settings, activity log, observation detail, and zoomed map screenshots are integrated. Map screenshots use `object-fit: contain` to retain attribution. The old Van Rakshak assets are not used; archived v1 source files remain untouched.
 
 ## Beta signup
 
