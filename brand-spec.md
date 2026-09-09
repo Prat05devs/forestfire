@@ -1,83 +1,28 @@
-# Van Rakshak landing page brand specification
+# AgniVision website design specification
 
-## Project status
+`context.md` is the product and marketing source of truth. The old Van Rakshak concept, field staff, incident command, emergency tools, and roadmap are not part of this landing page.
 
-Van Rakshak is presented as a product concept and interactive prototype. The landing page must not imply a connected emergency service, formal government deployment, or approved production data feed.
+## Visual direction
 
-## Identity assets
+Modern editorial public information: substantial typography, white space, forest-green feature sections, restrained thermal-orange accents, fine grid geometry, and framed screenshot placeholders. The site is designed around the actual public mobile application.
 
-- Working supplied logo: `public/brand/van-rakshak-logo.png`
-- The Himalayan red panda mascot and its onboarding screens are rejected and must not appear.
-- The landing page must reference the supplied logo as an image. It must not replace the identity with a CSS or hand drawn symbol.
+- Primary: #14532D; accent: #17633A; text: #17251B; surface: #F8F9FC.
+- Headings/body: locally hosted Bricolage Grotesque, with small and large optical sizes.
+- Select italic headline accents: locally hosted Newsreader.
+- The owner explicitly requested distinctive, researched typography instead of the original default/app typography.
+- The supplied `public/logo.png` is used for the site identity and `public/appicon.png` is used as the browser icon.
+- No old Van Rakshak images or mascot appear.
 
-## Product imagery
+## Product and interactions
 
-All product images are local prototype exports in `public/screens/`.
+Satellite observations, official NDMA advisories, destination watches, on-device opt-in proximity alerts, provenance, and privacy. Never imply verified incidents, real-time coverage, safety guidance, prediction, government endorsement, or configured remote push delivery.
 
-### Public mobile
+Every download action opens a beta-interest modal because the app is in testing. Store links will be added after release. Beta names/emails go to admin@wtitsolutions.cc, through direct email delivery when configured or an explicitly labelled prepared-email fallback.
 
-- `public-home.png`
-- `destination-search.png`
-- `place-situation.png`
-- `live-map.png`
-- `fire-danger.png`
-- `incident-details.png`
-- `alerts.png`
-- `report-fire.png`
-- `trip-setup.png`
-- `active-trip.png`
-- `watch-area.png`
-- `trail-explorer.png`
-- `trail-detail.png`
-- `digital-permit.png`
-- `sos.png`
+## Screenshots and responsive behavior
 
-### Field staff mobile
+Exact asset slots are documented in `public/screens/README.md`. Preserve Google branding in complete screenshots. Placeholder labels must not masquerade as app observations or data. Desktop split layouts stack on mobile; tabs support arrows/Home/End; navigation has a mobile menu; FAQ uses native disclosures; the beta modal uses native dialog focus containment and Escape dismissal. Respect reduced-motion preferences.
 
-- `staff-priority.png`
-- `staff-task.png`
-- `staff-profile.png`
-- `duty-roster.png`
-- `communications.png`
-- `incident-closure.png`
+## Owner-confirmed details and open items
 
-### Command and recovery
-
-- `command-overview.png`
-- `command-dossier.png`
-- `seasonal-trends.png`
-- `recovery-sitrep.png`
-
-## Colour roles
-
-- Pine: `#082D20`
-- Mist: `#F8F9FF`
-- Glacier: `#E5EEFF`
-- Ember: `#F57C00`
-- Emergency: `#C91F25`
-- Night: `#131209`
-- Muted copy: `#5F6B66`
-
-Red remains restricted to emergency and active incident meaning. Orange carries caution, orientation, and selected emphasis. Light blue carries source and information context.
-
-## Typography
-
-Manrope Variable is the single landing page typeface. Weight is capped at bold. The design uses sentence case, balanced headings, and readable body measures.
-
-## Image treatment
-
-- Use screenshots as product evidence, not decoration.
-- Group screens into understandable user journeys.
-- Use realistic device frames for mobile views and browser frames for command views.
-- Do not show every screen at equal size.
-- Do not place unsupported operational labels over screenshots.
-- Every image requires descriptive alternative text.
-
-## Protected product rules
-
-- Public value appears before authentication.
-- No public login requirement.
-- Public, field, and command experiences remain visibly connected to one incident model.
-- Source, verification, freshness, and uncertainty remain central.
-- Planned integrations and missing access remain explicit.
-- Offline data must never look silently live.
+Dehradun jurisdiction, intended minimum age 13, admin@wtitsolutions.cc for support/privacy/beta. Legal entity, registered address, final legal clauses, standard support and deletion times, beta-mail retention, and full app-record deletion still need completion. Keep the relevant legal pages marked as drafts.

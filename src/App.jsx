@@ -1,746 +1,135 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  ArrowRight,
-  Broadcast,
-  Buildings,
-  CaretDown,
-  Check,
-  CheckCircle,
-  CloudArrowDown,
-  Database,
-  Eye,
-  HardDrives,
-  ListChecks,
-  NavigationArrow,
-  Pulse,
-  Radio,
-  ShieldCheck,
-  Tree,
-  UsersThree,
-  Warning,
-  WifiSlash,
-  X,
-} from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, ArrowUpRight, Bell, CaretDown, Check, CheckCircle, Crosshair, Database, DeviceMobile, Fire, GlobeHemisphereEast, Image as ImageIcon, List, MapPin, MapTrifold, Mountains, NavigationArrow, ShieldCheck, SlidersHorizontal, Sparkle, X } from '@phosphor-icons/react';
 
-const navigation = [
-  ["Platform", "#platform"],
-  ["Flows", "#flows"],
-  ["Data", "#data"],
-  ["Screens", "#screens"],
-  ["Roadmap", "#roadmap"],
-  ["FAQ", "#faq"],
-];
+const screenshotSources = {
+  home: '/home_overview.png',
+  map: '/map-screen.png',
+  advisories: '/official_advisories-weather.png',
+  destination: '/recent_updates-uttarakhand.png',
+  activity: '/all-fire-alers.png',
+  detail: '/alert-detail.png',
+  zoom: '/zoomed-map.png',
+};
+const screenshotNames = { home: 'Home overview', map: 'Satellite observation map', advisories: 'Official advisories', destination: 'Uttarakhand recent updates', settings: 'Notification preferences', activity: 'Observation log', detail: 'Detection details', zoom: 'Zoomed satellite map' };
+const navigation = [['The app', '/#features'], ['Destinations', '/#destinations'], ['Our data', '/#data'], ['FAQs', '/#faq']];
+const disclaimer = 'AgniVision.live reports satellite detections and thermal anomalies — not verified ground incidents or safety clearances.';
 
-const benefits = [
-  {
-    icon: Eye,
-    title: "Public clarity",
-    copy: "Translate detections, warnings, and verified incidents into a plain answer about place, distance, freshness, and action.",
-  },
-  {
-    icon: Radio,
-    title: "Field continuity",
-    copy: "Give crews one next action, an offline incident pack, evidence capture, and an explicit synchronization state.",
-  },
-  {
-    icon: Buildings,
-    title: "Command oversight",
-    copy: "Connect statewide priorities, incident dossiers, resources, data health, and recovery evidence in one operational view.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Visible provenance",
-    copy: "Carry the source, verification level, observation time, publication time, and freshness state with every important fact.",
-  },
-  {
-    icon: Tree,
-    title: "Recovery evidence",
-    copy: "Extend the incident story beyond containment with satellite comparison, vegetation indicators, and governed situation reports.",
-  },
-];
-
-const platformModes = [
-  {
-    eyebrow: "Public mobile",
-    title: "What affects my place right now?",
-    copy: "A calm public experience for residents and visitors. It starts with value, not authentication, and keeps map and list views equivalent.",
-    actions: ["Check a place", "Understand confidence", "Watch a trip", "Report an observation"],
-    images: ["/screens/public-home.png", "/screens/live-map.png", "/screens/alerts.png"],
-    tone: "light",
-  },
-  {
-    eyebrow: "Forest staff mobile",
-    title: "What must I act on next?",
-    copy: "An action first field tool for authorized personnel, designed around assignments, offline continuity, evidence, and auditable state changes.",
-    actions: ["Acknowledge priority", "Download incident pack", "Verify on site", "Close and synchronize"],
-    images: ["/screens/staff-priority.png", "/screens/staff-task.png", "/screens/duty-roster.png"],
-    tone: "dark",
-  },
-  {
-    eyebrow: "Command web",
-    title: "Where does intervention matter now?",
-    copy: "A dense command surface for incident coordination, resource allocation, data health, intelligence review, and recovery governance.",
-    actions: ["Inspect priority", "Coordinate resources", "Audit evidence", "Review recovery"],
-    images: ["/screens/command-dossier.png", "/screens/recovery-sitrep.png", "/screens/seasonal-trends.png"],
-    tone: "command",
-  },
-];
-
-const flowColumns = [
-  {
-    label: "Public flow",
-    icon: UsersThree,
-    steps: ["Open in a language", "See the selected area", "Search or explore the map", "Open an incident", "Read source and guidance", "Watch, share, or report"],
-  },
-  {
-    label: "Field flow",
-    icon: NavigationArrow,
-    steps: ["Authenticate with department access", "Review the priority queue", "Accept an assignment", "Work from the offline pack", "Verify and capture evidence", "Resolve and synchronize"],
-  },
-  {
-    label: "Command flow",
-    icon: Buildings,
-    steps: ["Read the state situation", "Filter by administrative level", "Open the incident dossier", "Coordinate teams and resources", "Monitor source health", "Review analytics and recovery"],
-  },
-];
-
-const trustLevels = [
-  ["01", "Satellite detection", "A thermal anomaly is observed. It is not yet a confirmed forest fire.", "satellite"],
-  ["02", "Official automated data", "An alert arrives through an authorized source and keeps its issuing context.", "official"],
-  ["03", "Field verified", "Authorized forest personnel confirm what is happening on site.", "verified"],
-  ["04", "Active official incident", "A response operation is underway with an auditable operational state.", "active"],
-  ["05", "Resolved", "The department closes the incident and preserves its evidence and timeline.", "resolved"],
-];
-
-const sources = [
-  {
-    name: "NASA FIRMS",
-    purpose: "MODIS and VIIRS thermal detections for the prototype area.",
-    status: "Planned prototype connection",
-    className: "planned",
-  },
-  {
-    name: "NDMA SACHET",
-    purpose: "Official CAP and RSS warnings from participating government agencies.",
-    status: "Planned prototype connection",
-    className: "planned",
-  },
-  {
-    name: "IMD",
-    purpose: "Weather, rainfall, warnings, and nowcast context. Not a custom fire predictor.",
-    status: "Planned context source",
-    className: "planned",
-  },
-  {
-    name: "Copernicus Data Space",
-    purpose: "Sentinel 2 scene discovery, before and after imagery, and recovery indicators.",
-    status: "Planned imagery source",
-    className: "planned",
-  },
-  {
-    name: "Bhuvan",
-    purpose: "Indian place search and selected geospatial context where service access is suitable.",
-    status: "Planned after reliability testing",
-    className: "review",
-  },
-  {
-    name: "Forest Survey of India",
-    purpose: "Official fire detections, large fire information, and FWI based fire danger for departmental deployment.",
-    status: "Department access required",
-    className: "pending",
-  },
-  {
-    name: "Uttarakhand Forest Department systems",
-    purpose: "Incident state, field verification, administrative boundaries, stations, crews, and resources.",
-    status: "Approval and system access required",
-    className: "pending",
-  },
-];
-
-const excludedSources = [
-  "No custom wildfire prediction service in the initial prototype",
-  "No Google Earth Engine dependency",
-  "No Google Maps dependency unless later justified",
-  "No paid commercial weather feed in the initial scope",
-  "No generative AI deciding incident truth or public warnings",
-  "No drone integration in the initial scope",
-];
-
-const publicJourney = [
-  ["01", "Choose a place", "/screens/destination-search.png", "Search and select a destination"],
-  ["02", "Read the situation", "/screens/place-situation.png", "Place based forest situation"],
-  ["03", "Inspect the map", "/screens/live-map.png", "Live intelligence map"],
-  ["04", "Understand an incident", "/screens/incident-details.png", "Incident details and verification"],
-  ["05", "Stay informed", "/screens/alerts.png", "Alert and watch updates"],
-];
-
-const screenGroups = [
-  {
-    eyebrow: "Plan and explore",
-    copy: "Forest context begins before an emergency—with trip planning, watch areas, trail information, permits, and accessible safety tools.",
-    screens: [
-      ["Trip setup", "/screens/trip-setup.png", "Trip planning setup"],
-      ["Active trip", "/screens/active-trip.png", "Active trip safety view"],
-      ["Watch an area", "/screens/watch-area.png", "Area watch setup"],
-      ["Fire danger", "/screens/fire-danger.png", "Fire danger and weather context"],
-      ["Trail explorer", "/screens/trail-explorer.png", "Forest trail explorer"],
-      ["Trail detail", "/screens/trail-detail.png", "Trail detail and advisories"],
-      ["Digital permit", "/screens/digital-permit.png", "Digital forest permit"],
-      ["Emergency SOS", "/screens/sos.png", "Emergency SOS controls"],
-      ["Report an observation", "/screens/report-fire.png", "Public fire observation report"],
-    ],
-  },
-  {
-    eyebrow: "Coordinate in the field",
-    copy: "Authorized teams move from identity and duty context to communications, evidence, and incident closure—with every change ready for audit.",
-    screens: [
-      ["Staff profile", "/screens/staff-profile.png", "Forest staff profile"],
-      ["Duty roster", "/screens/duty-roster.png", "Field duty roster"],
-      ["Communications", "/screens/communications.png", "Operational communications"],
-      ["Incident closure", "/screens/incident-closure.png", "Incident closure evidence"],
-    ],
-  },
-];
-
-const roadmap = [
-  {
-    phase: "Now",
-    title: "Product system and prototype",
-    copy: "Define the incident model, role based flows, confidence grammar, screen system, and trustworthy integration plan.",
-  },
-  {
-    phase: "Next",
-    title: "Working data prototype",
-    copy: "Connect selected public sources through a normalization layer, add PostGIS, and validate freshness, caching, and failure states.",
-  },
-  {
-    phase: "With department access",
-    title: "Operational pilot",
-    copy: "Integrate FSI and departmental systems, validate permissions and terminology, test field workflows, and establish governance.",
-  },
-  {
-    phase: "After pilot evidence",
-    title: "Scaled public service",
-    copy: "Expand language coverage, accessibility testing, source resilience, recovery intelligence, and multi district operations.",
-  },
-];
-
-const faqs = [
-  ["Is Van Rakshak a live government service?", "No. This page presents a product concept and interactive prototype. It does not currently provide emergency information or confirm a formal Uttarakhand Forest Department deployment."],
-  ["Who is the platform designed for?", "It is designed as one incident platform with three role shaped experiences: public mobile for residents and visitors, staff mobile for authorized forest teams, and command web for coordination and oversight."],
-  ["Does the public need to create an account?", "No. The public experience is designed to show place based value before any optional personalization. Department staff access remains protected."],
-  ["Which data sources are already connected?", "No production feeds are represented as connected on this prototype page. NASA FIRMS, SACHET, IMD, Copernicus, and Bhuvan are proposed prototype sources. FSI and department systems require access and approval."],
-  ["How does the platform avoid confusing a detection with a confirmed fire?", "Every important record carries a visible trust level. Satellite detection, official automated data, field verification, active response, and resolution remain distinct. Community observations remain unverified until reviewed."],
-  ["Will it work with weak connectivity?", "The product architecture includes cached incident packs, explicit last update times, queued field actions, and clear synchronization states. Those behaviors still require implementation and field testing."],
-  ["Can people report smoke or fire?", "The proposed public flow accepts an observation, photo, and location for review. It never presents a community report as an official incident before verification."],
-  ["Does Van Rakshak predict where fire will spread?", "Not in the initial scope. The platform can display approved source information and contextual weather, but it should not create an unsupported public prediction or warning."],
-  ["How will privacy be handled?", "The design minimizes public personal data, separates public and staff permissions, and requires policy for location, image metadata, retention, moderation, and audit access before deployment."],
-  ["What needs validation before a pilot?", "Institutional ownership, approved terminology, emergency guidance, data agreements, access control, privacy policy, accessibility, offline reliability, and the operational incident state machine all require stakeholder validation."],
-];
-
-function useReveal() {
-  useEffect(() => {
-    const nodes = document.querySelectorAll("[data-reveal]");
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.dataset.visible = "true";
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { rootMargin: "0px 0px -80px", threshold: 0.12 },
-    );
-    nodes.forEach(node => observer.observe(node));
-    return () => observer.disconnect();
-  }, []);
+function Brand({ light = false }) {
+  return <a className={`brand ${light ? 'brand-light' : ''}`} href="/" aria-label="AgniVision home"><img className="brand-mark" src="/logo.png" alt="" /><span>AgniVision<span className="brand-live">.live</span></span></a>;
 }
-
-function Mark({ inverse = false }) {
-  return (
-    <span className={`brand-mark ${inverse ? "brand-mark-inverse" : ""}`} aria-hidden="true">
-      <img src="/brand/van-rakshak-logo.png" alt="" />
-    </span>
-  );
+function ScreenPreview({ screen = 'home', className = '' }) {
+  const [failed, setFailed] = useState(false);
+  const src = screenshotSources[screen];
+  useEffect(() => setFailed(false), [screen]);
+  return <div className={`device ${className}`}><div className="device-camera" aria-hidden="true" />{src && !failed ? <img src={src} onError={() => setFailed(true)} alt={`AgniVision app: ${screenshotNames[screen]}`} /> : <div className="screen-placeholder"><div className="placeholder-top"><Fire weight="fill" /><span>AgniVision<span>.live</span></span></div><div className="placeholder-center"><span className="placeholder-symbol"><ImageIcon weight="light" /></span><span className="small-label">APP SCREENSHOT</span><strong>{screenshotNames[screen]}</strong><span className="placeholder-note">A closer look is coming soon.</span></div><div className="placeholder-bottom"><span /><span /><span /></div></div>}<div className="device-home" aria-hidden="true" /></div>;
 }
-
-function Header() {
+function Header({ onBeta }) {
   const [open, setOpen] = useState(false);
-  const buttonRef = useRef(null);
-
-  useEffect(() => {
-    document.body.dataset.menuOpen = open ? "true" : "false";
-    const close = event => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        buttonRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [open]);
-
-  return (
-    <>
-      <a className="skip-link" href="#main">Skip to main content</a>
-      <header className="island-wrap">
-        <nav className="island" aria-label="Primary navigation">
-          <a className="brand-link" href="#top" aria-label="Van Rakshak home">
-            <Mark />
-            <span>Van Rakshak</span>
-          </a>
-          <div className="desktop-nav">
-            {navigation.map(([label, href]) => <a key={href} href={href} aria-current={href === "#platform" ? "page" : undefined}>{label}</a>)}
-          </div>
-          <a className="nav-cta button-press" href="#platform">Explore the platform <ArrowRight weight="bold" /></a>
-          <button
-            ref={buttonRef}
-            className="menu-button button-press"
-            type="button"
-            aria-label={open ? "Close navigation" : "Open navigation"}
-            aria-expanded={open}
-            onClick={() => setOpen(value => !value)}
-          >
-            <span className={open ? "open" : ""}><i /><i /></span>
-          </button>
-        </nav>
-      </header>
-      <div className="mobile-menu" data-open={open} aria-hidden={!open}>
-        <div className="mobile-menu-inner">
-          {navigation.map(([label, href], index) => (
-            <a key={href} href={href} aria-current={href === "#platform" ? "page" : undefined} style={{ "--delay": `${100 + index * 50}ms` }} onClick={() => setOpen(false)}>{label}</a>
-          ))}
-          <a className="mobile-primary" href="#platform" onClick={() => setOpen(false)}>Explore the platform <ArrowRight /></a>
-        </div>
-      </div>
-    </>
-  );
+  return <header className="site-header"><div className="container header-inner"><Brand /><nav aria-label="Main navigation" className={open ? 'navigation is-open' : 'navigation'}>{navigation.map(([name, href]) => <a key={name} href={href} onClick={() => setOpen(false)}>{name}</a>)}<button className="button button-small nav-mobile-cta" onClick={() => { setOpen(false); onBeta("both"); }}>Get the app <ArrowUpRight /></button></nav><button className="button button-small header-cta" onClick={() => onBeta("both")}>Get the app <ArrowUpRight /></button><button className="menu-toggle" onClick={() => setOpen(!open)} aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open}>{open ? <X /> : <List />}</button></div></header>;
 }
-
-function StatusBadge({ children, status = "concept" }) {
-  return <span className={`status-badge ${status}`}><span />{children}</span>;
-}
-
 function Hero() {
-  return (
-    <section className="hero" id="top">
-      <div className="contour-field" aria-hidden="true">
-        <svg viewBox="0 0 1200 700" preserveAspectRatio="none">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <path key={index} d={`M-80 ${70 + index * 46} C180 ${10 + index * 48}, 280 ${140 + index * 42}, 520 ${74 + index * 47} S850 ${135 + index * 43}, 1280 ${55 + index * 47}`} />
-          ))}
-        </svg>
-      </div>
-      <div className="signal-field" aria-hidden="true"><i /><i /><i /></div>
-      <div className="page-shell hero-grid">
-        <div className="hero-copy" data-reveal>
-          <StatusBadge>Product concept and interactive prototype</StatusBadge>
-          <h1>Know what is happening.<br />Know what to do next.</h1>
-          <p>Van Rakshak is a proposed forest fire intelligence and safety platform for people, field teams, and command operations across Uttarakhand.</p>
-          <div className="hero-actions">
-            <a className="primary-button button-press" href="#platform">Explore the platform <ArrowRight weight="bold" /></a>
-          </div>
-          <div className="proof-line" aria-label="Platform architecture summary">
-            <span><strong>One</strong> incident model</span>
-            <span><strong>Three</strong> coordinated experiences</span>
-            <span><strong>Five</strong> trust levels</span>
-          </div>
-          <p className="prototype-note"><Warning weight="fill" /> Prototype only. No live emergency feed is connected and this page is not an emergency service.</p>
-        </div>
-        <div className="hero-visual" data-reveal>
-          <div className="command-frame" aria-label="Command operations prototype">
-            <img src="/screens/command-dossier.png" alt="Van Rakshak command incident dossier prototype" />
-            <span>Command web · Incident dossier</span>
-          </div>
-          <div className="phone phone-public">
-            <img src="/screens/public-home.png" alt="Van Rakshak public home prototype" />
-          </div>
-          <div className="phone phone-staff">
-            <img src="/screens/staff-priority.png" alt="Van Rakshak field priority prototype" />
-          </div>
-          <div className="phone phone-alerts">
-            <img src="/screens/alerts.png" alt="Van Rakshak public alerts prototype" />
-          </div>
-          <div className="hero-visual-key" aria-hidden="true">
-            <span><i />Public clarity</span>
-            <span><i />Field action</span>
-            <span><i />Command oversight</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+  return <><section className="hero container"><div className="hero-copy"><div className="eyebrow"><span className="status-dot" /> A CLEARER PICTURE. A MORE INFORMED INDIA.</div><h1>Stay connected<br />to the places<br />you <span className="serif-accent">care about.</span></h1><p className="hero-description">Understand recent satellite observations, explore official advisories, and follow your favourite destinations. All in one simple app.</p><div className="hero-actions"><a href="#download" className="button">Discover AgniVision <ArrowUpRight size={19} /></a><a href="#features" className="text-link">Take a closer look <ArrowRight /></a></div><div className="hero-assurances"><span><Check /> Always free</span><span><Check /> No account</span><span><Check /> No ads</span></div></div><div className="hero-stage"><div className="stage-grid" aria-hidden="true" /><span className="stage-coordinate coordinate-top">30.3165° N &nbsp; 78.0322° E</span><div className="stage-caption"><span className="status-dot" /> BUILT FOR AWARENESS</div><ScreenPreview screen="map" className="hero-device-back" /><ScreenPreview screen="home" className="hero-device-front" /><div className="floating-note"><span className="note-icon"><MapPin weight="duotone" /></span><div><strong>Your places. In perspective.</strong><span>Across India. Close to home.</span></div></div><span className="stage-coordinate coordinate-bottom">INDIA-WIDE PERSPECTIVE / LOCAL CONTEXT</span></div></section><div className="source-strip"><div className="container source-strip-inner"><span className="source-intro">PUBLIC DATA.<br /><strong>Clearer understanding.</strong></span><span className="source-name"><GlobeHemisphereEast /> NASA FIRMS <small>Satellite observations</small></span><span className="source-name"><ShieldCheck /> NDMA SACHET <small>Official advisories</small></span><span className="source-name"><MapTrifold /> Google Maps <small>Map experience</small></span><a href="/attributions" aria-label="Read data sources and attribution"><ArrowUpRight /></a></div></div></>;
+}
+const featureTabs = [
+  { id: 'map', number: '01', icon: MapTrifold, label: 'Explore the map', title: 'A wider view.\nA clearer understanding.', copy: 'See recent satellite thermal observations across India on a continuous heat map. Zoom in to explore individual observations and the detail behind them.', points: ['Choose a 24-hour, 3-day, or 5-day window', 'Filter by observation type and source confidence', 'See approximate place names, not just coordinates'], detail: 'Satellite observations are thermal anomalies, not confirmed ground incidents.', tag: 'SATELLITE OBSERVATIONS' },
+  { id: 'advisories', number: '02', icon: ShieldCheck, label: 'Read official advisories', title: 'Official information.\nIn one place.', copy: 'Read government warnings for floods, thunderstorms, lightning, and other hazards from the official NDMA SACHET public feed.', points: ['Find advisories on Home and destination pages', 'Explore a dedicated advisory list and detail view', 'Keep official severity separate from satellite confidence'], detail: 'AgniVision uses a public feed and is not affiliated with or endorsed by NDMA.', tag: 'OFFICIAL ADVISORIES' },
+  { id: 'settings', number: '03', icon: Bell, label: 'Make alerts your own', title: 'Your attention.\nYour preferences.', copy: 'Choose when nearby satellite observations matter to you. Proximity alerts are opt-in, with controls that put you in charge.', points: ['Choose a 5, 10, 25, or 50 km radius', 'Set a minimum source-confidence class', 'Set quiet hours and an optional high-confidence override'], detail: 'Proximity alerting currently runs on-device. Satellite passes are periodic.', tag: 'PERSONAL PREFERENCES' },
+];
+function Features() {
+  const [active, setActive] = useState(0);
+  const feature = featureTabs[active];
+  function moveTab(event, index) {
+    const target = event.key === 'ArrowRight' ? (index + 1) % featureTabs.length : event.key === 'ArrowLeft' ? (index + featureTabs.length - 1) % featureTabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? featureTabs.length - 1 : null;
+    if (target !== null) { event.preventDefault(); setActive(target); document.getElementById(`feature-tab-${target}`)?.focus(); }
+  }
+  return <section id="features" className="section container"><div className="section-heading"><div><p className="eyebrow">MEET YOUR EVERYDAY PERSPECTIVE</p><h2>A little more context.<br />A lot more clarity.</h2></div><p>From a view of the country to a place you know.<br className="desktop-break" /> Information you can actually make sense of.</p></div><div className="feature-tabs" role="tablist" aria-label="Explore app features">{featureTabs.map((tab, index) => <button key={tab.id} id={`feature-tab-${index}`} role="tab" aria-selected={index === active} aria-controls="feature-panel" tabIndex={index === active ? 0 : -1} onKeyDown={e => moveTab(e, index)} onClick={() => setActive(index)}><span className="tab-number">{tab.number}</span><tab.icon size={21} /><span>{tab.label}</span><ArrowUpRight className="tab-arrow" /></button>)}</div><div className="feature-panel" id="feature-panel" role="tabpanel" aria-labelledby={`feature-tab-${active}`} tabIndex={0}><div className="feature-visual"><span className="feature-visual-label"><Crosshair /> {feature.tag}</span><div className="orbit orbit-one" /><div className="orbit orbit-two" /><ScreenPreview screen={feature.id} /><span className="visual-footer">Agnivision / a closer look</span></div><div className="feature-copy" key={feature.id}><span className="feature-index">{feature.number} / EXPLORE THE APP</span><h3>{feature.title.split('\n').map((line, i) => <span key={line}>{i > 0 && <br />}{line}</span>)}</h3><p>{feature.copy}</p><ul className="check-list">{feature.points.map(point => <li key={point}><CheckCircle weight="fill" />{point}</li>)}</ul><div className="context-note"><Sparkle /> <p>{feature.detail}</p></div></div></div></section>;
+}
+function Destinations() {
+  return <section id="destinations" className="destination-section"><div className="container destination-layout"><div className="destination-copy"><p className="eyebrow">SOME PLACES STAY WITH YOU</p><h2>Keep your favourite<br />places <span className="serif-accent">in sight.</span></h2><p>Home in the hills. Your next getaway. A trail you keep coming back to. Follow curated destinations and see the latest available observations around them.</p><div className="destination-stats"><div><strong>32</strong><span>curated Indian destinations</span></div><div><strong>5 days</strong><span>of satellite activity</span></div><div><strong>50 km</strong><span>around each destination</span></div></div><div className="destination-footnote"><MapPin /> Watch a destination without sharing your location.</div></div><div className="destination-visual"><div className="destination-back-label"><Mountains weight="light" /><span>ROOTED IN UTTARAKHAND.<br />LOOKING ACROSS INDIA.</span></div><ScreenPreview screen="destination" /><div className="destination-badge"><NavigationArrow weight="fill" /><span>A place you care about.<br /><strong>A perspective you can follow.</strong></span></div></div></div></section>;
+}
+function Details() {
+  const cards = [{ icon: MapPin, title: 'Coordinates, translated.', copy: 'Approximate labels such as “Near Malsi, Dehradun, Uttarakhand” make observations easier to place.' }, { icon: SlidersHorizontal, title: 'Less noise. More context.', copy: 'A filterable activity feed makes freshness, loading, and unavailable data clear.' }, { icon: ArrowUpRight, title: 'Made to share thoughtfully.', copy: 'Share a branded observation card, or save it to your gallery when you choose.' }];
+  return <section className="container detail-grid">{cards.map(card => <article key={card.title}><span className="detail-icon"><card.icon weight="light" /></span><h3>{card.title}</h3><p>{card.copy}</p></article>)}</section>;
+}
+function AppGallery() {
+  return <section className="gallery-section"><div className="container gallery-heading"><div><p className="eyebrow">FROM COUNTRY TO COORDINATE</p><h2>Follow the thread<br /><span className="serif-accent">behind every observation.</span></h2></div><p>Move from a national picture to a readable activity log, then open the source detail behind an individual satellite observation.</p></div><div className="container gallery-stage"><div className="gallery-shot gallery-shot-left"><span>01 / ACTIVITY</span><ScreenPreview screen="activity" /></div><div className="gallery-shot gallery-shot-center"><span>02 / DETAILS</span><ScreenPreview screen="detail" /></div><div className="gallery-shot gallery-shot-right"><span>03 / MAP</span><ScreenPreview screen="zoom" /></div></div></section>;
+}
+function Data() {
+  return <section id="data" className="section container data-section"><div className="data-heading"><p className="eyebrow">THE SOURCE IS PART OF THE STORY</p><h2>Open about the data.<br /><span className="serif-accent">Honest about its limits.</span></h2><p>Good information lets you see where it comes from. Every satellite observation includes an expandable source and attribution panel.</p><a href="/attributions" className="text-link">Explore our data sources <ArrowUpRight /></a></div><div className="data-content"><div className="provenance-card"><div className="provenance-heading"><Database /><span>Data sources & attribution</span><span className="transparency-label">TRANSPARENT BY DESIGN</span></div><dl><div><dt>Provider</dt><dd>NASA FIRMS</dd></div><div><dt>Instruments</dt><dd>MODIS & VIIRS</dd></div><div><dt>Observation details</dt><dd>Satellite · dataset · raw confidence</dd></div><div><dt>Freshness & provenance</dt><dd>Ingestion time · product version</dd></div></dl></div><div className="data-principles"><p><span>01</span><strong>Observations, not confirmations.</strong> A thermal anomaly is not a verified fire or an incident boundary.</p><p><span>02</span><strong>Recent, not instantaneous.</strong> Satellite passes are periodic; available data may be delayed.</p><p><span>03</span><strong>Confidence, not probability.</strong> Confidence describes source-data quality, not the likelihood of a fire.</p></div></div></section>;
+}
+function Privacy() {
+  return <section className="container privacy-section"><div className="privacy-intro"><span className="privacy-icon"><ShieldCheck weight="light" /></span><p className="eyebrow">AWARENESS WITHOUT THE TRADE-OFF</p><h2>Your places matter.<br />So does your privacy.</h2><p>No account to create. No ads to scroll past.<br />No analytics SDKs or third-party trackers in the app.</p><a href="/privacy" className="text-link">Our approach to privacy <ArrowUpRight /></a></div><div className="privacy-facts"><article><strong>01</strong><div><h3>Start with just the app.</h3><p>No name, email, phone number, or password required.</p></div></article><article><strong>02</strong><div><h3>Location is your choice.</h3><p>Nearby features are optional. Background location requires a separate opt-in.</p></div></article><article><strong>03</strong><div><h3>A position, not a trail.</h3><p>Coordinates are rounded before upload. Only the latest coarse position is retained, with a two-day expiry.</p></div></article></div></section>;
+}
+const faqs = [
+  ['What does a satellite observation mean?', 'It means a satellite instrument recorded a thermal anomaly. It does not confirm a fire on the ground, identify an ignition point, establish a perimeter, or provide a safety assessment.'],
+  ['How up to date is the information?', 'AgniVision shows the latest available satellite observations. Satellites pass periodically, and processing or delivery can introduce delays. You can filter observations to the last 24 hours, 3 days, or 5 days.'],
+  ['Does no recent activity mean a place is safe?', 'No. A zero-result view means no recent satellite detections were found. This does not mean the area is safe. Follow official local guidance.'],
+  ['Do I need to share my location?', 'No. You can explore the map and watch destinations without location permission. Location is optional for nearby observations and proximity alerts. Background proximity needs an explicit opt-in in Settings.'],
+  ['Is AgniVision a government service?', 'No. AgniVision is an independent public-information app developed by Prateek Thapliyal. It uses NASA FIRMS data and the public NDMA SACHET advisory feed. This does not imply government affiliation or endorsement.'],
+  ['Is the app free?', 'Yes. AgniVision is free, with no advertisements, subscriptions, in-app purchases, or user accounts. The app is currently in testing. You can register interest in the beta using the Get the app button. Store links will be added after release.'],
+];
+function FAQ() { return <section id="faq" className="section container faq-section"><div><p className="eyebrow">A FEW THINGS WORTH KNOWING</p><h2>Clarity starts<br />with questions.</h2><p>Get to know what AgniVision does,<br />and how to read what it shows.</p><a href="/support" className="text-link">Visit support <ArrowUpRight /></a></div><div className="faq-list">{faqs.map(([q, a]) => <details key={q}><summary>{q}<span><CaretDown /></span></summary><p>{a}</p></details>)}</div></section>; }
+function Download({ onBeta }) { return <section id="download" className="container download-section"><div><p className="eyebrow"><span className="status-dot" /> YOUR NEXT PERSPECTIVE</p><h2>A little closer to<br />the world around you.</h2><p>Currently in testing for Android and iOS.<br />Join the beta list for a chance to try it first.</p><div className="store-buttons"><button className="store-button" onClick={() => onBeta("android")} aria-label="Join the Android beta"><DeviceMobile /><span><small>JOIN THE BETA</small><strong>Android</strong></span></button><button className="store-button" onClick={() => onBeta("ios")} aria-label="Join the iOS beta"><DeviceMobile /><span><small>JOIN THE BETA</small><strong>iOS</strong></span></button></div></div><div className="download-mark" aria-hidden="true"><Fire weight="fill" /><span>Stay curious.<br />Stay informed.</span></div></section>; }
+function Footer() { return <footer className="site-footer container"><div className="footer-top"><div><Brand /><p>Satellite perspective. Human understanding.</p></div><div className="footer-links"><a href="/about">About</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/data-deletion">Data deletion</a><a href="/support">Support</a><a href="/attributions">Attributions</a></div></div><div className="footer-disclaimer"><p>{disclaimer}</p><p>For emergencies, contact official local emergency services. Follow official local guidance.</p></div><div className="footer-bottom"><span>© {new Date().getFullYear()} AgniVision. Built by Prateek Thapliyal.</span><span>Independent public information. No government affiliation.</span></div></footer>; }
+
+function Home({ onBeta }) { return <><Hero /><Features /><Destinations /><Details /><AppGallery /><Data /><Privacy /><FAQ /><Download onBeta={onBeta} /></>; }
+const pageTitles = { '/privacy': 'Privacy policy', '/terms': 'Terms of service', '/data-deletion': 'Data deletion', '/support': 'Support', '/about': 'About AgniVision', '/attributions': 'Data sources & attribution' };
+function InfoPage({ path }) {
+  return <div className="container info-page"><a className="text-link back-link" href="/">← Back to AgniVision</a><p className="eyebrow">AGNIVISION / {path === '/about' ? 'OUR STORY' : 'PRODUCT INFORMATION'}</p><h1>{pageTitles[path]}</h1>{['/privacy', '/terms', '/data-deletion'].includes(path) && <aside className="draft-notice"><strong>Draft · not ready for store submission</strong><p>Owner details and launch arrangements are still being confirmed. This page is provided for review. Full app-data deletion arrangements and final legal terms are still being completed.</p></aside>}<div className="info-content">
+{path === '/about' && <><h2>Satellite perspective, made understandable.</h2><p>AgniVision is an independent public-information app developed by Prateek Thapliyal for residents, travellers, journalists, researchers, and environmentally engaged citizens in India.</p><p>It brings satellite thermal observations and official government advisories into a readable mobile experience, with particular attention to Uttarakhand and its tourism ecosystem.</p><h2>A clear boundary</h2><p>{disclaimer}</p><p>It is not a government operations dashboard, an incident-management system, an emergency service, or a fire-prediction platform.</p><h2>Free, with no account required</h2><p>The app has no advertisements, subscriptions, in-app purchases, analytics SDKs, or third-party trackers.</p></>}
+{path === '/privacy' && <><p>This draft describes the app’s intended configured operation, using the verified product inventory. Server notification storage and remote push delivery are not currently configured; current proximity alerts run on-device. The final policy must match the launch configuration.</p><h2>Beta signup on this website</h2><p>The optional beta form asks for your name and email so the developer can contact you about beta testing. This is separate from using the app, which does not require an account. The form also records your selected platform and your agreement to beta-related contact. It does not subscribe you to general marketing.</p><p>Beta requests go to admin@wtitsolutions.cc. When direct delivery is configured, Resend processes the request to send an email to that inbox. Otherwise, the site prepares an email in your own email application, which you must send yourself. The website does not save your form in browser storage or a signup database. Requests are retained in the receiving mailbox; a final retention period is still to be confirmed. To withdraw beta interest or request deletion of a beta email, contact admin@wtitsolutions.cc.</p><h2>Age and jurisdiction</h2><p>The intended minimum age is 13. The owner has identified Dehradun, Uttarakhand, India as the jurisdiction. Age-related privacy requirements and the final legal wording remain subject to qualified review.</p><h2>No user accounts or advertising</h2><p>The app does not require your name, email, password, or phone number. It does not include ad SDKs, analytics SDKs, or third-party trackers. Personal data is not sold, rented, or shared for advertising.</p><h2>Installation and notification data</h2><p>The app generates a random installation identifier and a device secret, held in secure device storage. When server registration is configured, the server stores the identifier, a hash of the secret, platform, timezone offset, notification preferences, watched destinations, and notification inbox history. An Expo push token is stored only when push is configured.</p><h2>Optional location</h2><p>Location supports nearby observations and proximity alerts. Coordinates are rounded before upload. Only the most recent coarse position is retained; there is no route history. Background access starts only after you explicitly enable background proximity in Settings. You can disable nearby alerts and clear stored location in the app.</p><blockquote>“AgniVision.live uses your location to show nearby satellite detections and enable proximity alerts you choose.”</blockquote><blockquote>“AgniVision.live uses a coarse background location to check for nearby satellite detections when proximity alerts are enabled.”</blockquote><h2>Retention</h2><table><thead><tr><th>Data</th><th>Retention</th></tr></thead><tbody><tr><td>Notification inbox</td><td>180 days</td></tr><tr><td>Coarse location</td><td>2 days</td></tr><tr><td>Delivery / pacing records and push tickets</td><td>2 days</td></tr><tr><td>Observations in device memory</td><td>Up to 5 days or 2,500 newest observations</td></tr></tbody></table><h2>Permissions and providers</h2><p>Foreground and background location and notifications are optional. Photo-library add access is used only when you choose to save an observation image. Network access is needed to fetch data. Android foreground location service is used only with background proximity opt-in.</p><p>Infrastructure processors are Vercel, Upstash Redis / Vercel KV, and Expo Push Service when enabled. The app uses Google Maps Platform for map rendering, place search, and reverse geocoding. Data is encrypted in transit.</p><h2>Deletion and outstanding details</h2><p>See <a href="/data-deletion">Data deletion</a> for the current scope of deletion. Full installation deletion is not yet available through a confirmed process.</p><p>For support and privacy enquiries, email admin@wtitsolutions.cc. The legal entity, registered address, grievance contact where applicable, and retention or deletion arrangements for installation and beta records need owner confirmation. Qualified legal review is required before this draft is published as the final policy.</p></>}
+{path === '/terms' && <><h2>Public information only</h2><p>{disclaimer}</p><p>AgniVision is not an emergency service and must not replace official information or emergency assistance. For emergencies, contact official local emergency services.</p><h2>Understanding observations</h2><p>Satellite observations are thermal anomalies. They do not establish verified ground incidents, ignition points, incident boundaries, or safety conditions. Confidence is a source-data quality class, not a probability that a fire exists. Place labels are approximate.</p><p>Data can be delayed, incomplete, or unavailable. No recent detections does not mean an area is safe. Follow official local guidance.</p><h2>Third-party data</h2><p>NASA FIRMS supplies satellite observations. NDMA SACHET supplies official advisories through a public feed. Their use does not imply affiliation or endorsement. See <a href="/attributions">Attributions</a> for provider information and Google Maps terms.</p><h2>Age and jurisdiction</h2><p>The intended minimum age is 13. Dehradun, Uttarakhand, India is the owner-confirmed jurisdiction; the final governing-law and jurisdiction clause requires legal review.</p><h2>Pending legal completion</h2><p>The contracting entity, acceptable-use terms, warranties, liability provisions, and final governing-law wording require owner input and qualified legal review. They have not been invented in this draft.</p></>}
+{path === '/data-deletion' && <><h2>Clear your stored location</h2><p>You can disable nearby alerts and clear the stored location from within the app. Background proximity can also be disabled in Settings. Stored coarse location has a two-day server-side expiry when server storage is configured.</p><h2>What this does not delete</h2><p>Clearing location does not delete an installation’s preferences, destination watches, or notification inbox. Uninstalling the app should not be treated as a request to erase all server-side records.</p><h2>Public observations and personal records</h2><p>Satellite observations are public source data. Optional installation records, location, notification preferences, and beta signup names and emails are separate from that public dataset and still need a clear deletion process.</p><h2>Beta signup requests</h2><p>To withdraw beta interest or request deletion of a beta signup email, contact <a href="mailto:admin@wtitsolutions.cc?subject=AgniVision%20beta%20data%20request">admin@wtitsolutions.cc</a> from the email address used for your request. A standard completion time is still to be confirmed.</p><h2>Full app-data deletion: pending</h2><p>The app does not yet have an endpoint that deletes an installation’s full record. Although a privacy contact is available, the full-installation deletion procedure and completion time are not yet confirmed.</p><p>You may contact admin@wtitsolutions.cc with questions, but this page does not promise that emailing will delete all app records. A complete deletion procedure and timeline must be established before store submission.</p><a className="text-link" href="/privacy">Read the privacy draft <ArrowUpRight /></a></>}
+{path === '/support' && <><h2>Help with the app</h2><p>For information on satellite observations, location permissions, and data freshness, start with the <a href="/#faq">frequently asked questions</a>.</p><h2>Get in touch</h2><p>For support, privacy enquiries, and beta-testing requests, email <a href="mailto:admin@wtitsolutions.cc">admin@wtitsolutions.cc</a>.</p><p>Include your device platform and a brief description of the issue. Please do not send passwords, device secrets, or precise location data. A standard response time has not yet been announced.</p><h2>Emergency assistance</h2><p>AgniVision is a public-information app, not an emergency service. Contact official local emergency services for emergencies and follow official local guidance.</p></>}
+{path === '/attributions' && <><h2>NASA FIRMS</h2><p>Satellite thermal observations are provided by NASA’s Fire Information for Resource Management System (FIRMS), using MODIS and VIIRS instruments. We acknowledge NASA FIRMS and the NASA LANCE / ESDIS programme.</p><p><a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noreferrer">Visit NASA FIRMS ↗</a> · <a href="https://www.earthdata.nasa.gov/data/tools/firms/citation" target="_blank" rel="noreferrer">FIRMS citation guidance ↗</a></p><h2>NDMA SACHET</h2><p>Official hazard advisories are sourced from the National Disaster Management Authority’s public SACHET Common Alerting Protocol feed. AgniVision is not affiliated with, endorsed by, or a partner of NDMA.</p><p><a href="https://sachet.ndma.gov.in/" target="_blank" rel="noreferrer">Visit NDMA SACHET ↗</a></p><h2>Google Maps Platform</h2><p>Google Maps Platform provides the app’s map rendering, Places autocomplete, and reverse geocoding. Google branding and map attribution remain part of the map experience and must remain visible in app screenshots.</p><p><a href="https://maps.google.com/help/terms_maps/" target="_blank" rel="noreferrer">Google Maps / Google Earth Additional Terms of Service ↗</a> · <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Google Privacy Policy ↗</a></p><h2>Website typography</h2><p><a href="https://ateliertriay.github.io/bricolage/" target="_blank" rel="noreferrer">Bricolage Grotesque by Mathieu Triay</a> and <a href="https://productiontype.com/font/newsreader" target="_blank" rel="noreferrer">Newsreader by Production Type</a> are self-hosted under the SIL Open Font License. Font files are served by this website.</p><h2>Infrastructure</h2><p>Vercel provides web and API hosting. Upstash Redis / Vercel KV provides notification registration and inbox storage when provisioned. Expo Push Service provides push delivery when configured. See the <a href="/privacy">privacy draft</a> for processing and launch-configuration details.</p></>}
+</div></div>;
 }
 
-function SectionHeading({ eyebrow, title, copy, dark = false }) {
-  return (
-    <div className={`section-heading ${dark ? "dark" : ""}`} data-reveal>
-      <p className="eyebrow">{eyebrow}</p>
-      <h2>{title}</h2>
-      {copy && <p>{copy}</p>}
-    </div>
-  );
-}
-
-function ProblemSection() {
-  return (
-    <section className="section problem-section" id="problem">
-      <div className="page-shell">
-        <SectionHeading eyebrow="The problem" title="Signals exist. A shared incident story does not." copy="A satellite point, an official warning, a public observation, and a field report can describe the same event while carrying very different authority. Van Rakshak is designed to preserve those differences and connect them into one understandable operational record." />
-        <div className="benefit-grid">
-          {benefits.map(({ icon: Icon, title, copy }, index) => (
-            <article className="benefit-card" data-reveal key={title} style={{ "--delay": `${index * 60}ms` }}>
-              <span className="icon-tile"><Icon size={24} weight="duotone" /></span>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TaglineReveal() {
-  const ref = useRef(null);
-  const words = "One source aware system that tells each person what matters, without pretending every signal means the same thing.".split(" ");
-
+function BetaDialog({ platform, onClose }) {
+  const dialogRef = useRef(null);
+  const requestRef = useRef(null);
+  const [status, setStatus] = useState('checking');
+  const [error, setError] = useState('');
   useEffect(() => {
-    const nodes = ref.current?.querySelectorAll("span");
-    if (!nodes) return undefined;
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.dataset.active = "true";
-          observer.unobserve(entry.target);
-        }
-      }),
-      { rootMargin: "0px 0px -28%", threshold: 0.8 },
-    );
-    nodes.forEach(node => observer.observe(node));
-    return () => observer.disconnect();
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    dialogRef.current.showModal();
+    document.body.style.overflow = 'hidden';
+    const controller = new AbortController();
+    fetch('/api/beta', { signal: controller.signal }).then(res => res.ok ? res.json() : null).then(data => setStatus(data?.available ? 'ready' : 'email')).catch(err => { if (err.name !== 'AbortError') setStatus('email'); });
+    return () => { controller.abort(); requestRef.current?.abort(); document.body.style.overflow = previousOverflow; if (previousFocus instanceof HTMLElement) previousFocus.focus(); };
   }, []);
-
-  return (
-    <section className="tagline-section" aria-label="Core platform benefit">
-      <p ref={ref}>{words.map((word, index) => <span key={`${word}-${index}`} style={{ "--word-delay": `${index * 35}ms` }}>{word} </span>)}</p>
-    </section>
-  );
-}
-
-function PublicJourneySection() {
-  return (
-    <section className="section journey-section" aria-labelledby="journey-title">
-      <div className="page-shell">
-        <div className="journey-intro" data-reveal>
-          <p className="eyebrow">A public journey, not a login wall</p>
-          <h2 id="journey-title">From “where am I going?” to “what should I do now?”</h2>
-          <p>Residents and visitors can understand a place before choosing any optional personalization. Each step adds detail without hiding source, confidence, or freshness.</p>
-        </div>
-        <div className="journey-rail">
-          {publicJourney.map(([number, title, image, alt], index) => (
-            <figure className="journey-screen" key={title} data-reveal style={{ "--delay": `${index * 70}ms`, "--lift": `${index % 2 === 0 ? 0 : 56}px` }}>
-              <div className="journey-device"><img src={image} alt={alt} loading="lazy" /></div>
-              <figcaption><span>{number}</span><strong>{title}</strong></figcaption>
-            </figure>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PlatformSection() {
-  return (
-    <section className="section platform-section" id="platform">
-      <div className="page-shell">
-        <SectionHeading eyebrow="One platform, three experiences" title="The same incident, shaped around the decision each role must make." copy="Public screens stay calm and progressive. Field screens make the next operational action dominant. Command screens preserve density, provenance, and auditability." />
-        <div className="mode-stack">
-          {platformModes.map((mode, index) => (
-            <article className={`mode-card ${mode.tone}`} key={mode.eyebrow} data-reveal>
-              <div className="mode-copy">
-                <p className="eyebrow">0{index + 1} · {mode.eyebrow}</p>
-                <h3>{mode.title}</h3>
-                <p>{mode.copy}</p>
-                <ul>{mode.actions.map(item => <li key={item}><Check size={18} weight="bold" />{item}</li>)}</ul>
-              </div>
-              <div className="mode-visual">
-                {mode.images.map((image, imageIndex) => (
-                  <img key={image} className={`mode-screen mode-screen-${imageIndex + 1}`} src={image} alt={`${mode.eyebrow} prototype screen ${imageIndex + 1}`} loading="lazy" />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FlowsSection() {
-  return (
-    <section className="section flows-section" id="flows">
-      <div className="page-shell">
-        <SectionHeading eyebrow="Application flows" title="Each journey begins with one urgent question and ends with a clear next state." copy="The flows are designed around role, authority, connectivity, and evidence. They do not force public users through a login experience." />
-        <div className="flow-grid">
-          {flowColumns.map(({ label, icon: Icon, steps }, columnIndex) => (
-            <article className="flow-card" key={label} data-reveal>
-              <div className="flow-title"><span><Icon size={24} weight="duotone" /></span><h3>{label}</h3></div>
-              <ol>
-                {steps.map((step, index) => (
-                  <li key={step}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <p>{step}</p>
-                    {index < steps.length - 1 && <i aria-hidden="true" style={{ "--flow-delay": `${columnIndex * 100 + index * 60}ms` }} />}
-                  </li>
-                ))}
-              </ol>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function TrustSection() {
-  return (
-    <section className="section trust-section">
-      <div className="page-shell">
-        <SectionHeading eyebrow="Confidence before colour" title="A detection is not a warning. A report is not a verified incident." copy="Van Rakshak uses named trust levels, distinct shapes, source labels, and timestamps so people can understand both the information and its limits." dark />
-        <div className="trust-list">
-          {trustLevels.map(([number, title, copy, status]) => (
-            <article className="trust-row" data-reveal key={number}>
-              <span className={`trust-mark ${status}`}>{number}</span>
-              <div><h3>{title}</h3><p>{copy}</p></div>
-              <StatusBadge status={status}>{title}</StatusBadge>
-            </article>
-          ))}
-          <article className="community-note" data-reveal>
-            <UsersThree size={24} weight="duotone" />
-            <div><h3>Community observation remains separate</h3><p>A public report stays visibly unverified until an authorized review changes its state.</p></div>
-          </article>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function DataSection() {
-  return (
-    <section className="section data-section" id="data">
-      <div className="page-shell">
-        <SectionHeading eyebrow="Data architecture" title="Designed around authoritative sources, with missing access made explicit." copy="The frontend should never call external feeds directly. A normalization layer turns source specific records into a consistent incident model while preserving provenance and freshness." />
-        <div className="data-layout">
-          <div className="source-table" data-reveal>
-            <div className="table-head"><span>Source</span><span>Role in the platform</span><span>Current project status</span></div>
-            {sources.map(source => (
-              <article className="source-row" key={source.name}>
-                <h3>{source.name}</h3>
-                <p>{source.purpose}</p>
-                <StatusBadge status={source.className}>{source.status}</StatusBadge>
-              </article>
-            ))}
-          </div>
-          <aside className="not-source-card" data-reveal>
-            <span className="icon-tile"><X size={24} weight="bold" /></span>
-            <p className="eyebrow">Intentionally outside initial scope</p>
-            <h3>What the prototype will not depend on</h3>
-            <ul>{excludedSources.map(item => <li key={item}><Check size={18} />{item}</li>)}</ul>
-          </aside>
-        </div>
-        <div className="architecture" data-reveal aria-label="Proposed data flow architecture">
-          <div className="architecture-sources">
-            {["NASA FIRMS", "FSI", "IMD", "SACHET", "Copernicus", "Bhuvan"].map(name => <span key={name}>{name}</span>)}
-          </div>
-          <ArrowRight className="architecture-arrow" size={28} />
-          <div className="architecture-node primary"><HardDrives size={28} weight="duotone" /><strong>Van Rakshak backend</strong><span>Normalize · deduplicate · preserve source</span></div>
-          <ArrowRight className="architecture-arrow" size={28} />
-          <div className="architecture-node"><Database size={28} weight="duotone" /><strong>PostGIS and clean API</strong><span>Incidents · warnings · places · source health</span></div>
-          <ArrowRight className="architecture-arrow" size={28} />
-          <div className="architecture-products"><span>Public mobile</span><span>Staff mobile</span><span>Command web</span></div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function OfflineSection() {
-  const items = [
-    [CloudArrowDown, "Cached incident packs", "Field teams retain essential maps, instructions, contacts, and incident context."],
-    [Pulse, "Visible freshness", "The last successful observation and synchronization time remain readable."],
-    [WifiSlash, "Honest degraded states", "The interface says what is unavailable, what is cached, and what can still be trusted."],
-    [ListChecks, "Queued field work", "Authorized actions can be stored locally and synchronized with a visible outcome."],
-  ];
-  return (
-    <section className="section offline-section">
-      <div className="page-shell offline-layout">
-        <div>
-          <SectionHeading eyebrow="Field reality" title="Weak connectivity is a product state, not an edge case." copy="The experience is designed to remain useful when a network is unreliable, while never making cached information look live." />
-          <div className="offline-grid">
-            {items.map(([Icon, title, copy]) => <article key={title} data-reveal><Icon size={24} weight="duotone" /><h3>{title}</h3><p>{copy}</p></article>)}
-          </div>
-        </div>
-        <div className="sync-demo" data-reveal>
-          <div className="sync-top"><Radio size={24} weight="duotone" /><span>Field incident pack</span><StatusBadge status="planned">Offline ready</StatusBadge></div>
-          <div className="sync-map" aria-hidden="true"><span /><i /><i /></div>
-          <div className="sync-actions">
-            <div><CheckCircle size={22} weight="fill" /><span><strong>Arrival captured</strong><small>Stored on this device</small></span></div>
-            <div><CheckCircle size={22} weight="fill" /><span><strong>Evidence attached</strong><small>Waiting to synchronize</small></span></div>
-            <div className="waiting"><Broadcast size={22} /><span><strong>Command update</strong><small>Queued until connection returns</small></span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function GallerySection() {
-  return (
-    <section className="section gallery-section" id="screens">
-      <div className="page-shell">
-        <SectionHeading eyebrow="Screen atlas" title="A product ecosystem, not a single emergency map." copy="The supplied prototypes reveal a broader service: planning, situational awareness, field coordination, command decisions, and post-fire recovery." dark />
-        <div className="screen-atlas">
-          {screenGroups.map(group => (
-            <section className="atlas-group" key={group.eyebrow}>
-              <div className="atlas-copy" data-reveal><p className="eyebrow">{group.eyebrow}</p><p>{group.copy}</p></div>
-              <div className="gallery-track">
-                {group.screens.map(([title, image, alt]) => (
-                  <figure key={title} data-reveal>
-                    <div><img src={image} alt={alt} loading="lazy" /></div>
-                    <figcaption>{title}<span>Prototype</span></figcaption>
-                  </figure>
-                ))}
-              </div>
-            </section>
-          ))}
-          <section className="command-showcase" data-reveal>
-            <div className="command-showcase-copy">
-              <p className="eyebrow">Command and recovery</p>
-              <h3>See the active incident, the season, and what happens after containment.</h3>
-              <p>Wide operational screens connect the incident dossier to statewide overview, seasonal intelligence, and governed recovery reporting.</p>
-            </div>
-            <div className="command-browser command-browser-main"><img src="/screens/command-dossier.png" alt="Command incident dossier" loading="lazy" /></div>
-            <div className="command-browser command-browser-overview"><img src="/screens/command-overview.png" alt="Command overview" loading="lazy" /></div>
-            <div className="command-browser command-browser-trends"><img src="/screens/seasonal-trends.png" alt="Seasonal fire trends" loading="lazy" /></div>
-            <div className="command-browser command-browser-recovery"><img src="/screens/recovery-sitrep.png" alt="Recovery situation report" loading="lazy" /></div>
-          </section>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RoadmapSection() {
-  return (
-    <section className="section roadmap-section" id="roadmap">
-      <div className="page-shell">
-        <SectionHeading eyebrow="Development path" title="From coherent prototype to governed public service." copy="The technology is only one part of readiness. Institutional approval, source access, privacy, language, accessibility, operational policy, and field validation must advance together." />
-        <div className="roadmap-list">
-          {roadmap.map((item, index) => (
-            <article key={item.phase} data-reveal>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <p className="eyebrow">{item.phase}</p>
-              <h3>{item.title}</h3>
-              <p>{item.copy}</p>
-            </article>
-          ))}
-        </div>
-        <div className="readiness-banner" data-reveal>
-          <ShieldCheck size={32} weight="duotone" />
-          <div><p className="eyebrow">Readiness gate</p><h3>Nothing becomes an official claim simply because it appears in a prototype.</h3><p>Government relationship, source rights, warnings, emergency guidance, terminology, and operational metrics require the relevant authority’s approval.</p></div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FAQSection() {
-  return (
-    <section className="section faq-section" id="faq">
-      <div className="page-shell faq-layout">
-        <SectionHeading eyebrow="Questions and boundaries" title="What the platform is, and what it is not yet." copy="The most important product promise is honesty about confidence, source access, and operational readiness." />
-        <div className="faq-list">
-          {faqs.map(([question, answer]) => (
-            <details key={question} data-reveal>
-              <summary>{question}<CaretDown size={20} weight="bold" /></summary>
-              <p>{answer}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FinalCTA() {
-  return (
-    <section className="final-cta" id="architecture">
-      <div className="final-contours" aria-hidden="true" />
-      <div className="page-shell" data-reveal>
-        <Mark inverse />
-        <p className="eyebrow">Built as one understandable incident story</p>
-        <h2>Explore how Van Rakshak connects public clarity, field action, and command oversight.</h2>
-        <a className="light-button button-press" href="#platform">Explore the platform <ArrowRight weight="bold" /></a>
-        <p className="final-note">Concept and prototype only. Not for emergency use.</p>
-      </div>
-    </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer>
-      <div className="page-shell footer-grid">
-        <div className="footer-brand"><Mark inverse /><div><strong>Van Rakshak</strong><span>Forest intelligence for Uttarakhand</span></div></div>
-        <div className="footer-links">
-          {navigation.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
-        </div>
-        <div className="footer-legal">
-          <details id="privacy"><summary>Privacy approach</summary><p>The prototype minimizes personal data and requires approved policy for location, images, metadata, retention, moderation, and access before deployment.</p></details>
-          <details id="terms"><summary>Prototype terms</summary><p>This experience is a design and engineering concept. It is not an emergency service, operational warning source, or statement of government approval.</p></details>
-        </div>
-      </div>
-      <div className="page-shell footer-bottom"><span>Concept developed for Uttarakhand, India</span><span>Design status · working prototype</span></div>
-    </footer>
-  );
-}
-
-function NotFound() {
-  return (
-    <main className="not-found">
-      <Mark />
-      <p className="eyebrow">404 · Route not found</p>
-      <h1>This trail does not continue.</h1>
-      <p>Return to the Van Rakshak platform story.</p>
-      <a className="primary-button button-press" href="/">Return home <ArrowRight /></a>
-    </main>
-  );
+  async function submit(event) {
+    event.preventDefault();
+    if (status === 'submitting' || status === 'checking') return;
+    const fields = new FormData(event.currentTarget);
+    if (!String(fields.get('name')).trim() || fields.get('website')) return;
+    if (status === 'email' || status === 'email-opened') {
+      const message = `Hello AgniVision team,\n\nI would like to beta test AgniVision.\n\nName: ${String(fields.get('name')).trim()}\nEmail: ${String(fields.get('email')).trim()}\nPlatform: ${platform}\n\nI agree to be contacted about the AgniVision beta only.`;
+      window.location.href = `mailto:admin@wtitsolutions.cc?subject=${encodeURIComponent('AgniVision beta testing request')}&body=${encodeURIComponent(message)}`;
+      setStatus('email-opened');
+      return;
+    }
+    setStatus('submitting'); setError('');
+    const controller = new AbortController();
+    requestRef.current = controller;
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch('/api/beta', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ name: fields.get('name'), email: fields.get('email'), website: fields.get('website'), consent: fields.get('consent') === 'on', platform }) });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || result?.success !== true) throw new Error(response.status === 429 ? 'Please wait a moment before trying again.' : 'Direct delivery is unavailable. You can send your request through your email app below.');
+      setStatus('success');
+    } catch (err) {
+      setStatus('email');
+      setError(err.name === 'AbortError' ? 'The request timed out. Please try again.' : err.message);
+    } finally { clearTimeout(timer); }
+  }
+  return <dialog ref={dialogRef} className="beta-dialog" aria-labelledby="beta-title" aria-describedby="beta-description" onCancel={onClose} onClick={event => { if (event.target === dialogRef.current) { const rect = dialogRef.current.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) onClose(); } }}><button className="dialog-close" onClick={onClose} aria-label="Close beta signup"><X /></button><span className="beta-symbol">{status === 'success' ? <CheckCircle weight="light" /> : <img src="/logo.png" alt="" />}</span>{status === 'success' ? <><p className="eyebrow">THANK YOU FOR YOUR INTEREST</p><h2 id="beta-title">Request received.</h2><p id="beta-description">Your beta request has been accepted for email delivery to the AgniVision team. We’ll contact you when testing invitations are available.</p><button className="button beta-submit" onClick={onClose}>Back to exploring <ArrowRight /></button></> : <><p className="eyebrow">A FIRST LOOK AT AGNIVISION</p><h2 id="beta-title">Be part of<br /><span className="serif-accent">what's next.</span></h2><p id="beta-description">The app is currently in testing{platform === 'both' ? ' for Android and iOS' : ` for ${platform === 'ios' ? 'iOS' : 'Android'}`}. Leave your name and email to register your interest in the beta.</p><form onSubmit={submit}><label htmlFor="beta-name">Your name</label><input id="beta-name" name="name" autoComplete="name" placeholder="Full name" required minLength={2} maxLength={100} autoFocus /><label htmlFor="beta-email">Email address</label><input id="beta-email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required maxLength={254} /><div className="form-trap" aria-hidden="true"><label htmlFor="beta-website">Leave this empty</label><input id="beta-website" name="website" tabIndex={-1} autoComplete="off" /></div><label className="beta-consent"><input type="checkbox" name="consent" required /><span>I agree to be contacted about the AgniVision beta. <a href="/privacy" target="_blank" rel="noreferrer">Privacy details ↗</a></span></label>{status === 'email' && <p className="form-notice" role="status">Your email app will open with a request to admin@wtitsolutions.cc. Send it there to complete your request.</p>}{status === 'email-opened' && <p className="form-notice" role="status">Your request has not been sent by this website. Please send the prepared message in your email app. If it did not open, email <a href="mailto:admin@wtitsolutions.cc">admin@wtitsolutions.cc</a> with your name and platform.</p>}{error && <p className="form-error" role="alert">{error}</p>}<button className="button beta-submit" type="submit" disabled={['checking', 'submitting'].includes(status)}>{status === 'checking' ? 'Checking availability…' : status === 'submitting' ? 'Joining the list…' : ['email', 'email-opened'].includes(status) ? 'Continue in email app' : 'Join the beta list'}<ArrowUpRight /></button><p className="beta-small">Only beta-related updates. No general marketing.</p></form></>}</dialog>;
 }
 
 export default function App() {
-  useReveal();
-  if (window.location.pathname !== "/" && window.location.pathname !== "/index.html") return <NotFound />;
-  return (
-    <>
-      <Header />
-      <main id="main">
-        <Hero />
-        <ProblemSection />
-        <PublicJourneySection />
-        <TaglineReveal />
-        <PlatformSection />
-        <FlowsSection />
-        <TrustSection />
-        <DataSection />
-        <OfflineSection />
-        <GallerySection />
-        <RoadmapSection />
-        <FAQSection />
-        <FinalCTA />
-      </main>
-      <Footer />
-    </>
-  );
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  useEffect(() => { document.title = path === '/' ? 'AgniVision — Satellite Fire Detection & Official Advisories for India' : `${pageTitles[path] || 'Page not found'} — AgniVision`; }, [path]);
+  const [betaPlatform, setBetaPlatform] = useState(null);
+  return <><a href="#main" className="skip-link">Skip to content</a><Header onBeta={setBetaPlatform} /><main id="main">{path === '/' ? <Home onBeta={setBetaPlatform} /> : pageTitles[path] ? <InfoPage path={path} /> : <div className="container info-page"><p className="eyebrow">404 / PAGE NOT FOUND</p><h1>Let’s get you back.</h1><a className="button" href="/">Return home <ArrowRight /></a></div>}</main><Footer />{betaPlatform && <BetaDialog platform={betaPlatform} onClose={() => setBetaPlatform(null)} />}</>;
 }
