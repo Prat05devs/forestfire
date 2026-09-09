@@ -19,6 +19,8 @@ Vite previews the website at its printed local URL. The Vercel API function runs
 
 See `public/screens/README.md` for the supplied filename mapping. The Home, India map, official advisories, Uttarakhand updates, notification settings, activity log, observation detail, and zoomed map screenshots are integrated. Map screenshots use `object-fit: contain` to retain attribution. The old Van Rakshak assets are not used; archived v1 source files remain untouched.
 
+The responsive layout uses full-width storytelling bands on desktop, a dedicated tablet composition at 900px, and phone refinements at 600px and 380px. Content containers use fluid gutters, all grid children can shrink safely, and screenshot rows scroll within their section instead of creating page-level horizontal overflow.
+
 ## Beta signup
 
 Every Get the app / Android / iOS button opens an accessible modal with name, email, and consent for beta-related contact. The destination is **admin@wtitsolutions.cc**.

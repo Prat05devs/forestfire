@@ -23,6 +23,8 @@ Every download action opens a beta-interest modal because the app is in testing.
 
 Exact asset slots are documented in `public/screens/README.md`. Preserve Google branding in complete screenshots. Placeholder labels must not masquerade as app observations or data. Desktop split layouts stack on mobile; tabs support arrows/Home/End; navigation has a mobile menu; FAQ uses native disclosures; the beta modal uses native dialog focus containment and Escape dismissal. Respect reduced-motion preferences.
 
+The hero, destination story, screenshot gallery, data band, and beta call-to-action use full-width or full-height presentation bands with constrained inner content. Desktop layouts target wide screens without stretching reading lines; the primary tablet breakpoint is 900px; mobile layouts use 600px and 380px refinements. Device mockups stay inside their section bounds, feature tabs become horizontally scrollable on phones, and the screenshot gallery uses contained scroll snapping instead of off-canvas positioning.
+
 ## Owner-confirmed details and open items
 
 Dehradun jurisdiction, intended minimum age 13, admin@wtitsolutions.cc for support/privacy/beta. Legal entity, registered address, final legal clauses, standard support and deletion times, beta-mail retention, and full app-record deletion still need completion. Keep the relevant legal pages marked as drafts.
