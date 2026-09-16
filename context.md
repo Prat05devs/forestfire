@@ -35,7 +35,7 @@ legal pages; do not invent values for them.
 | Version | 1.0.0 (Android versionCode 2) |
 | Deep-link scheme | `agnivision://` |
 | Platforms | Android and iOS |
-| Developer | Prateek Thapliyal |
+| Developer | Team AgniVision |
 | Category | Weather / Maps & Navigation / News (public information) |
 | Cost | Free. No ads, no in-app purchases, no subscriptions, no user accounts. |
 

@@ -109,7 +109,7 @@ Required landing-page disclaimer:
 
 Confirmed details:
 
-- Developer: Prateek Thapliyal
+- Developer: Team AgniVision
 - Jurisdiction: Dehradun, Uttarakhand, India
 - Intended minimum age: 13
 - Support, privacy, and beta email: `admin@wtitsolutions.cc`
